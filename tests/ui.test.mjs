@@ -10,7 +10,7 @@ import {campaign,daily} from '../app/src/main/assets/engine.mjs'
 const require=createRequire(import.meta.url)
 const {chromium}=require('playwright')
 const assets=fileURLToPath(new URL('../app/src/main/assets/',import.meta.url))
-const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs'}
+const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs','/save.mjs':'save.mjs','/content.mjs':'content.mjs','/hint-worker.mjs':'hint-worker.mjs'}
 const server=createServer(async(req,res)=>{
   const name=files[req.url];if(!name){res.writeHead(404);res.end();return}
   res.setHeader('Content-Type',name.endsWith('.mjs')?'text/javascript':name.endsWith('.css')?'text/css':'text/html')
@@ -49,10 +49,16 @@ test('daily puzzle and reset; billing unavailable is honest; no overflow on smal
     await page.setViewportSize({width:360,height:640});await click(page,'daily')
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
     await solve(page,daily(new Date().toISOString().slice(0,10)));assert.match(await page.locator('.modal').innerText(),/Perfectly forged/)
-    await click(page,'next');assert.match(await page.locator('.card').last().innerText(),/complete/)
+    await click(page,'next');assert.match(await page.locator('.card').filter({hasText:'Daily forge'}).innerText(),/complete/)
     await click(page,'workshop');assert(await page.locator('[data-act="buy"]').isDisabled());await click(page,'home');await click(page,'settings');await click(page,'setting','labels');await page.reload();await click(page,'settings');assert.equal(await page.locator('[data-value="labels"]').getAttribute('aria-checked'),'false')
     await click(page,'reset');await click(page,'confirm-reset');assert.match(await page.locator('.nav').innerText(),/0/)
     assert.deepEqual(errors,[])
+  }finally{await context.close()}
+})
+test('separate campaign/daily resume and permanent crafting',async()=>{
+  const{page,context,errors}=await setup()
+  try{
+    await click(page,'continue');await click(page,'tube',0);await click(page,'tube',2);await click(page,'home');await click(page,'daily');await click(page,'home');await page.reload();await click(page,'continue');assert.equal(await page.locator('.game-header strong').first().innerText(),'1');await click(page,'undo');await solve(page,campaign(1));await click(page,'workshop');await click(page,'craft','lantern');assert.match(await page.locator('[data-act="craft"][data-value="lantern"]').innerText(),/On display/);await page.reload();await click(page,'workshop');assert.match(await page.locator('[data-act="craft"][data-value="lantern"]').innerText(),/On display/);await click(page,'home');assert.match(await page.locator('[data-act="daily"]').innerText(),/Resume/);assert.deepEqual(errors,[])
   }finally{await context.close()}
 })
 test('corrupt local save does not crash; high-level portrait and landscape boards fit horizontally',async()=>{

@@ -4,6 +4,14 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.OnBackPressedCallback;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.content.pm.PackageInfo;
+import android.webkit.RenderProcessGoneDetail;
+import android.webkit.WebResourceError;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Button;
 import android.view.HapticFeedbackConstants;
 import android.view.WindowInsets;
 import android.webkit.JavascriptInterface;
@@ -28,15 +36,36 @@ public final class MainActivity extends ComponentActivity {
         assets.put("/style.css", "text/css");
         assets.put("/app.mjs", "application/javascript");
         assets.put("/engine.mjs", "application/javascript");
+        assets.put("/content.mjs", "application/javascript");
+        assets.put("/save.mjs", "application/javascript");
+        assets.put("/hint-worker.mjs", "application/javascript");
         ASSETS = Collections.unmodifiableMap(assets);
     }
     private WebView web;
     private PlayStore store;
     private boolean pageReady;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        web = new WebView(this);
+        store = new PlayStore(this, this::sendBillingState);
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() { handleBack(); }
+        });
+        createWeb();
+    }
+
+    private void createWeb() {
+        pageReady = false;
+        try {
+            PackageInfo provider = WebView.getCurrentWebViewPackage();
+            if (provider == null || Integer.parseInt(provider.versionName.split("\\.")[0]) < 90) {
+                showError("Update Android System WebView or Chrome in Google Play, then try again."); return;
+            }
+            web = new WebView(this);
+        } catch (RuntimeException error) {
+            showError("The Android WebView is unavailable. Update Android System WebView and try again."); return;
+        }
         web.setBackgroundColor(0xff111722);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -49,6 +78,13 @@ public final class MainActivity extends ComponentActivity {
         settings.setMediaPlaybackRequiresUserGesture(true);
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         web.setWebViewClient(new WebViewClient() {
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                if (web == view) showError("The game renderer stopped. Your saved progress is still on this device.");
+                return true;
+            }
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame() && web == view) showError("The game could not load. Please try again.");
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return true; // The game has no external navigation.
             }
@@ -76,11 +112,31 @@ public final class MainActivity extends ComponentActivity {
             });
             web.requestApplyInsets();
         }
-        store = new PlayStore(this, this::sendBillingState);
         web.loadUrl(START);
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override public void handleOnBackPressed() { handleBack(); }
-        });
+        WebView loading = web;
+        handler.postDelayed(() -> { if (web == loading && !pageReady) showError("The game could not start. Update Android System WebView if needed and try again."); }, 12000);
+    }
+
+    private void showError(String message) {
+        WebView old = web;
+        web = null;
+        pageReady = false;
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setGravity(android.view.Gravity.CENTER);
+        layout.setBackgroundColor(0xff111722);
+        layout.setPadding(36, 36, 36, 36);
+        TextView text = new TextView(this);
+        text.setText(message);
+        text.setTextColor(0xfff6eddf);
+        text.setTextSize(18);
+        layout.addView(text);
+        Button retry = new Button(this);
+        retry.setText("Try again");
+        retry.setOnClickListener(v -> createWeb());
+        layout.addView(retry);
+        setContentView(layout);
+        if (old != null) { old.removeJavascriptInterface("FoundryNative"); old.destroy(); }
     }
 
     @Override protected void onResume() {
@@ -104,6 +160,7 @@ public final class MainActivity extends ComponentActivity {
         });
     }
     @Override protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
         if (store != null) store.close();
         if (web != null) {
             web.removeJavascriptInterface("FoundryNative");
@@ -120,6 +177,6 @@ public final class MainActivity extends ComponentActivity {
             });
         }
         @JavascriptInterface public void buyPlus() { runOnUiThread(() -> store.buy()); }
-        @JavascriptInterface public void restore() { runOnUiThread(() -> store.refresh()); }
+        @JavascriptInterface public void restore() { runOnUiThread(() -> store.restore()); }
     }
 }

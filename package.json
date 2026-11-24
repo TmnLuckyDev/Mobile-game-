@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/engine.test.mjs",
+    "test": "node --test tests/engine.test.mjs tests/save.test.mjs",
     "test:ui": "node --test tests/ui.test.mjs"
   },
   "devDependencies": { "playwright": "1.57.0" }

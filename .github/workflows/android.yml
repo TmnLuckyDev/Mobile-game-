@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: if test -f package-lock.json; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --ignore-scripts --no-audit --no-fund; fi
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
@@ -30,6 +30,11 @@ jobs:
         with:
           name: browser-gameplay-screenshots
           path: artifacts/screenshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-lockfile
+          path: package-lock.json
+          if-no-files-found: error
   android-build:
     runs-on: ubuntu-24.04
     steps:
@@ -44,43 +49,25 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
-      - run: gradle --no-daemon --continue :app:assembleDebug :app:bundleRelease :app:lintDebug
+      - run: gradle --no-daemon wrapper --gradle-version 8.13 --distribution-type bin
+      - run: gradle --no-daemon --continue :app:assembleDebug :app:bundleRelease :app:lintDebug :app:lintRelease
       - name: Print lint findings
         if: always()
         run: find app/build -name 'lint-results-debug.txt' -type f -exec head -n 160 {} \;
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: android-candidate
           path: |
             app/build/outputs/apk/debug/*.apk
             app/build/outputs/bundle/release/*.aab
             app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-release.html
           if-no-files-found: error
-  android-smoke:
-    needs: android-build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: android-candidate
-          path: candidate
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 36
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          disable-animations: true
-          script: bash tests/android-smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: native-android-screenshots
-          path: artifacts/native
+          name: gradle-wrapper-files
+          path: |
+            gradlew
+            gradlew.bat
+            gradle/wrapper/*

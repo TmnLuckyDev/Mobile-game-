@@ -1,0 +1,40 @@
+name: Signed Play candidate (manual)
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  signed-bundle:
+    runs-on: ubuntu-24.04
+    environment: play-release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
+      - name: Build signed Play bundle without publishing
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_BILLING_PUBLIC_KEY: ${{ secrets.PLAY_BILLING_PUBLIC_KEY }}
+        run: |
+          test -n "$UPLOAD_KEYSTORE_BASE64" || { echo 'Missing Play upload keystore'; exit 1; }
+          umask 077
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/pocket-foundry-upload.jks"
+          trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
+          printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$ANDROID_KEYSTORE_PATH"
+          gradle --no-daemon -PreleaseReady=true :app:lintRelease :app:bundleRelease
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-play-candidate
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error

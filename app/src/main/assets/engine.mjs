@@ -96,7 +96,7 @@ export function generate(seed, colors, cap = 4, steps = 30, empties = 2) {
       }
       if (!choices.length) break
       let pick = rng() * choices.reduce((s, x) => s + x.weight, 0)
-      const choice = choices.find(x => (pick -= x.weight) < 0) || choices.at(-1)
+      const choice = choices.find(x => (pick -= x.weight) < 0) || choices[choices.length-1]
       board = choice.next
       reverse.push([choice.b, choice.a])
       seen.add(JSON.stringify(board))
@@ -130,6 +130,17 @@ export function campaign(level) {
 
 export function daily(date) {
   return generate(`daily-v1-${date}`, 6 + hash(date) % 3, 4, 36)
+}
+
+export const ORDER_COUNT=24
+export function orders(level){
+  const n=Math.max(1,Math.min(ORDER_COUNT,Math.trunc(level)))
+  const colors=3+Math.floor((n-1)/6),cap=n%3===1?3:n%3===2?4:5,empties=n%2===0?1:2
+  return {...generate(`orders-v1-${n}`,colors,cap,22,empties),variant:empties===1?'Single reserve':'Special mold'}
+}
+export function endless(level){
+  const n=Math.max(1,Math.min(100000,Math.trunc(level)))
+  return {...generate(`endless-v1-${n}`,5+n%5,3+n%3,30+n%12,n%4===0?1:2),variant:'Mastery'}
 }
 
 export function stars(moves, par) {

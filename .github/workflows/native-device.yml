@@ -1,0 +1,41 @@
+name: Native Android release gate
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [26, 36]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify hardware acceleration is available
+        run: |
+          test -c /dev/kvm && test -r /dev/kvm && test -w /dev/kvm || { echo 'Native release gate blocked: this runner does not have accessible KVM. Use an authorized accelerated runner or physical device lab.'; exit 1; }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
+      - run: gradle --no-daemon :app:assembleDebug
+      - run: mkdir -p candidate && cp app/build/outputs/apk/debug/*.apk candidate/
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: bash tests/android-smoke.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-android-api-${{ matrix.api }}
+          path: artifacts/native
