@@ -1,0 +1,8 @@
+// Short procedural metal impacts, no external sound downloads or audio permissions.
+export function createSound(){
+  let ctx=null,master=null,noise=null
+  function init(){if(ctx)return;const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;ctx=new Audio();master=ctx.createGain();master.gain.value=.38;master.connect(ctx.destination);noise=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.09),ctx.sampleRate);const samples=noise.getChannelData(0);let seed=17;for(let i=0;i<samples.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;samples[i]=(seed/4294967296)*2-1}}
+  function partial(f,t,len,vol){const o=ctx.createOscillator(),gain=ctx.createGain();o.type='sine';o.frequency.value=f;gain.gain.setValueAtTime(.0001,t);gain.gain.linearRampToValueAtTime(vol,t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+len);o.connect(gain).connect(master);o.start(t);o.stop(t+len+.02)}
+  function strike(t,f,vol){[1,1.47,2.13,3.86].forEach((ratio,i)=>partial(f*ratio,t,.14-i*.023,vol/(i+1)));const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=noise;filter.type='bandpass';filter.frequency.value=1800;filter.Q.value=.5;gain.gain.setValueAtTime(vol*.3,t);gain.gain.exponentialRampToValueAtTime(.0001,t+.075);source.connect(filter).connect(gain).connect(master);source.start(t);source.stop(t+.085)}
+  return {play(kind){try{init();if(!ctx)return;if(ctx.state==='suspended')ctx.resume().catch(()=>{});const t=ctx.currentTime+.015;if(kind==='error'){partial(170,t,.12,.025);return}if(kind==='win'){[392,523,659,784].forEach((f,i)=>strike(t+i*.075,f,.052));return}strike(t,kind==='forge'?620:365,kind==='forge'?.07:.045)}catch{}},suspend(){if(ctx)ctx.suspend().catch(()=>{})}}
+}

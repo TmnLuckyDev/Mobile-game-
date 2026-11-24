@@ -2,6 +2,7 @@ import {LEVEL_COUNT,ORDER_COUNT,COLORS,move,amount,won,complete,stars,hint,copy}
 import {THEMES,RECIPES,treasureArt} from './content.mjs'
 import {defaults,load,persist,reset,puzzleFor,today} from './save.mjs'
 import {QUESTS,weeklyProgress,recordVictory,claimQuest} from './economy.mjs'
+import {createSound} from './sound.mjs'
 
 const root = document.querySelector('#app')
 const SHAPES = ['◆','●','▲','■','✦','♥','⬟','✚','◈','☰']
@@ -10,18 +11,13 @@ let data=loaded.data, screen='home', game=null, selected=-1, guidance=null, mess
 let worker=null,hintTimer=null,hintCache=new Map(),animation=null,modalFocus=null
 const currentDay=()=>[today(),data.lastDate].sort().pop()
 const active=mode=>data.activeByMode[mode]
-let billing={available:false,owned:false,price:'',message:''}, audioContext=null, toastTimer=null
+let billing={available:false,owned:false,price:'',message:''}, toastTimer=null
+const audio=createSound()
 function save(){try{persist(localStorage,data)}catch{showToast('Progress could not be saved on this device.')}}
 function showToast(text){const t=document.querySelector('#toast');t.textContent=text;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
 function sound(kind='tap'){
   if(data.settings.haptic){try{if(window.FoundryNative)window.FoundryNative.haptic(kind==='win'?'strong':'light');else if(navigator.vibrate)navigator.vibrate(kind==='win'?[22,45,32]:10)}catch{}}
-  if(!data.settings.audio)return
-  try{
-    audioContext ||= new (window.AudioContext||window.webkitAudioContext)()
-    if(audioContext.state==='suspended')audioContext.resume().catch(()=>{})
-    const notes=kind==='win'?[392,523,659,784]:kind==='forge'?[440,660,880]:kind==='error'?[150]:[330,470]
-    notes.forEach((f,i)=>{let time=audioContext.currentTime+i*.075;let o=audioContext.createOscillator(),g=audioContext.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(.055,time+.017);g.gain.exponentialRampToValueAtTime(.001,time+.18);o.connect(g).connect(audioContext.destination);o.start(time);o.stop(time+.19)})
-  }catch{}
+  if(data.settings.audio)audio.play(kind)
 }
 function theme(){return THEMES.find(t=>t.id===data.theme)||THEMES[0]}
 function has(t){return t.premium?billing.owned:data.owned.includes(t.id)}
@@ -168,5 +164,5 @@ root.addEventListener('click',e=>{
   }
 })
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();window.foundryBack()}else if(e.key==='Tab'&&modal){const buttons=[...root.querySelectorAll('.modal button:not(:disabled)')];if(!buttons.length)return;if(e.shiftKey&&document.activeElement===buttons[0]){e.preventDefault();buttons[buttons.length-1].focus()}else if(!e.shiftKey&&document.activeElement===buttons[buttons.length-1]){e.preventDefault();buttons[0].focus()}}})
-document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelHint();audioContext?.suspend().catch(()=>{})}})
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelHint();audio.suspend()}})
 render();if(loaded.recovered)showToast('Your last valid save was recovered.');if(loaded.legacy||loaded.recovered)save();nativeAction('ready')

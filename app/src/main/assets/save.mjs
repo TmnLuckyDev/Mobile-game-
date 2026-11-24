@@ -33,6 +33,7 @@ export function migrate(s){
   return d
 }
 function parse(storage,key){try{return migrate(JSON.parse(storage.getItem(key)||'null'))}catch{return null}}
-export function load(storage){const main=parse(storage,KEY),backup=parse(storage,BACKUP),old=parse(storage,LEGACY);return {data:main||backup||old||defaults(),recovered:!main&&!!backup,legacy:!main&&!backup&&!!old}}
-export function persist(storage,data){const previous=parse(storage,KEY);if(previous)storage.setItem(BACKUP,JSON.stringify(previous));data.revision++;storage.setItem(KEY,JSON.stringify(data))}
-export function reset(storage){for(const key of [KEY,BACKUP,LEGACY])storage.removeItem(key)}
+const snapshots=new WeakMap()
+export function load(storage){const main=parse(storage,KEY),backup=main?null:parse(storage,BACKUP),old=main||backup?null:parse(storage,LEGACY),data=main||backup||old||defaults();if(main||backup||old)snapshots.set(storage,JSON.stringify(data));return {data,recovered:!main&&!!backup,legacy:!main&&!backup&&!!old}}
+export function persist(storage,data){const previous=snapshots.get(storage);if(previous)storage.setItem(BACKUP,previous);data.revision++;const serialized=JSON.stringify(data);storage.setItem(KEY,serialized);snapshots.set(storage,serialized)}
+export function reset(storage){snapshots.delete(storage);for(const key of [KEY,BACKUP,LEGACY])storage.removeItem(key)}

@@ -9,7 +9,7 @@ This is still a pre-release candidate. The independent review's release gates re
 - T08–T09: serialized product/purchase queries, explicit restore outcomes, bounded acknowledgment retries, pending and verified purchase handling. Actual Play purchase tests and backend verification have not been completed.
 - T10/T12: keyboard/focus restoration and modal focus trap/inert background, asynchronous hint worker with timeout/cancellation and bounded cache. Rendering is still DOM based, not a full incremental component architecture.
 - T11: verified shortest-path targets for first 25 campaign levels. Original boards kept to protect existing saved games. Later targets are certified, not optimal.
-- T14/T15: suspend audio on background, split state, economy, content and solver into modules. Full CSS/audio-asset polish remains future work.
+- T14/T15: separate sound mixer with filtered percussive metal tones and background suspension, split state, economy, content and solver into modules. Full CSS and professionally recorded audio-asset polish remain future work.
 - T16–T18: npm lockfile, checksum-pinned Gradle wrapper, release and debug lint, candidate upload only after successful build, native and signed release workflows, legacy backup exclusions and Android game category. Main protection requires repository administration. Review final merged permissions and SDK disclosures before release.
 - T20: campaign completion state, 24 special orders with three mold capacities and one/two reserves, seeded mastery mode.
 - Product: eight craftable illustrated treasures, visible workshop shelf, metal economy, additional cosmetic themes, improved premium mold visuals, stepwise tutorial, ingot flight/drop and forge glow, large symbols/reduced motion, optional weekly goals.

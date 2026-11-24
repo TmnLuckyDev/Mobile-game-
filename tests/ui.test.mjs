@@ -5,12 +5,12 @@ import {readFile,mkdir} from 'node:fs/promises'
 import {fileURLToPath} from 'node:url'
 import {join} from 'node:path'
 import {createRequire} from 'node:module'
-import {campaign,daily} from '../app/src/main/assets/engine.mjs'
+import {campaign,daily,orders} from '../app/src/main/assets/engine.mjs'
 
 const require=createRequire(import.meta.url)
 const {chromium}=require('playwright')
 const assets=fileURLToPath(new URL('../app/src/main/assets/',import.meta.url))
-const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs','/save.mjs':'save.mjs','/content.mjs':'content.mjs','/hint-worker.mjs':'hint-worker.mjs','/economy.mjs':'economy.mjs'}
+const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs','/save.mjs':'save.mjs','/content.mjs':'content.mjs','/hint-worker.mjs':'hint-worker.mjs','/economy.mjs':'economy.mjs','/sound.mjs':'sound.mjs'}
 const server=createServer(async(req,res)=>{
   const name=files[req.url];if(!name){res.writeHead(404);res.end();return}
   res.setHeader('Content-Type',name.endsWith('.mjs')?'text/javascript':name.endsWith('.css')?'text/css':'text/html')
@@ -59,6 +59,13 @@ test('separate campaign/daily resume and permanent crafting',async()=>{
   const{page,context,errors}=await setup()
   try{
     await click(page,'continue');await click(page,'tube',0);await click(page,'tube',2);await click(page,'home');await click(page,'daily');await click(page,'home');await page.reload();await click(page,'continue');assert.equal(await page.locator('.game-header strong').first().innerText(),'1');await click(page,'undo');await solve(page,campaign(1));await click(page,'workshop');await click(page,'craft','lantern');assert.match(await page.locator('[data-act="craft"][data-value="lantern"]').innerText(),/On display/);await page.reload();await click(page,'workshop');assert.match(await page.locator('[data-act="craft"][data-value="lantern"]').innerText(),/On display/);await click(page,'home');assert.match(await page.locator('[data-act="daily"]').innerText(),/Resume/);assert.deepEqual(errors,[])
+  }finally{await context.close()}
+})
+test('two special orders unlock a weekly reward only once',async()=>{
+  const{page,context,errors}=await setup()
+  try{
+    for(let n=1;n<=2;n++){await click(page,'orders-menu');await click(page,'order',n);await solve(page,orders(n));assert.match(await page.locator('.modal').innerText(),/5 metal/);await click(page,'home')}
+    await click(page,'quests');await click(page,'claim-quest','orders');assert(await page.locator('[data-act="claim-quest"][data-value="orders"]').isDisabled());assert.match(await page.locator('[data-act="claim-quest"][data-value="orders"]').innerText(),/Claimed/);assert.deepEqual(errors,[])
   }finally{await context.close()}
 })
 test('corrupt local save does not crash; high-level portrait and landscape boards fit horizontally',async()=>{

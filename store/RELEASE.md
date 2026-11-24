@@ -4,7 +4,7 @@ This is a pre-release candidate, not a signed or published production game. Do n
 
 ## 1. Build / device verification
 
-- Verify the latest GitHub Actions run is green: engine tests, UI tests, Android lint, APK and AAB build. The Android emulator smoke job additionally verifies Android 16 launch, touch input, process restart, resume, and tutorial completion if the hosted runner supports emulation.
+- Verify the latest GitHub Actions run is green: engine tests, UI tests, Android debug and release lint, APK and AAB build. Independently run the manual Native Android release gate (API 26 and 36), which requires accessible accelerated emulation. A blocked runner is not a passed native test. Verify a signed/minified build too.
 - Install the debug APK on at least one Android 16 device and one older supported device. Test pause/resume, process kill, rotate, system back, offline launch, all controls, color symbols, and restore after closing the app.
 - Check screenshots on a real Android device. Browser screenshots from CI are preview assets for review, not proof of a native device test.
 - Review accessibility with TalkBack and verify font sizing, touch targets and cutouts.
@@ -15,7 +15,7 @@ This is a pre-release candidate, not a signed or published production game. Do n
 - Create a Google Play developer account if not already available, complete identity and payment-profile checks as applicable.
 - Create the app using application ID `com.tmnluckydev.pocketfoundry`. Verify brand name and package availability before establishing permanent identity.
 - In Play Console, enable Play App Signing and securely create/retain an upload key. Never commit private signing keys or passwords to the repository.
-- Create one-time product ID `foundry_plus`, non-consumable, with an active purchase option for the supported markets. Proposed launch price USD 2.99 or appropriate local equivalent, subject to store pricing and tax. It unlocks two themes only.
+- Create one-time product ID `foundry_plus`, non-consumable, with an active purchase option for the supported markets. Test a price in the USD 2.99–4.99 range or appropriate local equivalent, subject to store pricing and tax. It unlocks two exclusive workshop styles and their enhanced mold finishes/glow.
 - Retrieve the app's Play licensing public key and use it as `PLAY_BILLING_PUBLIC_KEY` for verification. This is not the private signing key. The game supports free play if no valid public key is configured.
 - Configure license testers. Verify successful, canceled, pending, restored, already-owned and refunded purchases with a Play-distributed test build. Confirm the price is localized and no entitlement is granted for an unverified/pending purchase. The client-only cosmetic purchase design is not a server-side entitlement system. Consider a secure backend if the monetization expands.
 

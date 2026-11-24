@@ -40,6 +40,7 @@ public final class MainActivity extends ComponentActivity {
         assets.put("/save.mjs", "application/javascript");
         assets.put("/hint-worker.mjs", "application/javascript");
         assets.put("/economy.mjs", "application/javascript");
+        assets.put("/sound.mjs", "application/javascript");
         ASSETS = Collections.unmodifiableMap(assets);
     }
     private WebView web;
