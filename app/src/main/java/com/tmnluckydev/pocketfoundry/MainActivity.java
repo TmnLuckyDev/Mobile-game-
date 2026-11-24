@@ -115,7 +115,7 @@ public final class MainActivity extends Activity {
         }
         super.onDestroy();
     }
-    private final class Bridge {
+    public final class Bridge {
         @JavascriptInterface public void ready() { runOnUiThread(() -> { pageReady = true; store.publish(); }); }
         @JavascriptInterface public void haptic(String strength) {
             runOnUiThread(() -> {

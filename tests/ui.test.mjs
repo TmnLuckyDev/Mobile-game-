@@ -19,7 +19,11 @@ const server=createServer(async(req,res)=>{
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:['--no-sandbox']})
 const url=`http://127.0.0.1:${server.address().port}`
-const click=(page,act,value)=>page.locator(`[data-act="${act}"]${value===undefined?'':`[data-value="${value}"]`}`).first().click()
+const click=async(page,act,value)=>{
+  const selector=`[data-act="${act}"]${value===undefined?'':`[data-value="${value}"]`}`
+  const modal=page.locator(`.modal ${selector}`)
+  await (await modal.count()?modal.first():page.locator(selector).first()).click()
+}
 const solve=async(page,p)=>{for(const [a,b] of p.path){await click(page,'tube',a);await click(page,'tube',b)}}
 const setup=async()=>{const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2,hasTouch:true});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('404'))errors.push(m.text())});await page.goto(url);await page.locator('[data-act="continue"]').waitFor();return{page,context,errors}}
 
