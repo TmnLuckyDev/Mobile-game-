@@ -4,3 +4,6 @@
 @media(min-width:520px){.board{max-width:440px}.hero{min-height:262px}.tube{aspect-ratio:.68}.card{padding:20px}}
 @media(orientation:landscape) and (max-height:650px){#app.game-screen{max-width:960px;display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto auto 1fr auto auto;gap:8px 22px!important}.game-screen .bar,.game-screen .game-header,.game-screen .game-progress,.game-screen .message,.game-screen .controls{grid-column:1}.game-screen .board-wrap{grid-column:2;grid-row:1/6}.game-screen .board{max-width:650px;grid-template-columns:repeat(var(--land-cols),minmax(0,1fr));gap:13px 10px}.game-screen .tube{aspect-ratio:.66}.game-screen .message{min-height:24px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Hints use light instead of moving the touch target. */
+.tube.hint-from,.tube.hint-to{animation-name:hintGlow}
+@keyframes hintGlow{50%{box-shadow:0 0 16px #ffde96bb}}

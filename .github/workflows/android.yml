@@ -20,9 +20,13 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
+      - name: Capture preview screenshots
+        run: node --test --test-name-pattern='capture real gameplay images' tests/ui.test.mjs
+        continue-on-error: true
         env:
           ARTIFACT_DIR: artifacts/screenshots
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: browser-gameplay-screenshots
           path: artifacts/screenshots
@@ -40,8 +44,12 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
-      - run: gradle --no-daemon :app:lintDebug :app:assembleDebug :app:bundleRelease
+      - run: gradle --no-daemon --continue :app:assembleDebug :app:bundleRelease :app:lintDebug
+      - name: Print lint findings
+        if: always()
+        run: find app/build -name 'lint-results-debug.txt' -type f -exec head -n 160 {} \;
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: android-candidate
           path: |

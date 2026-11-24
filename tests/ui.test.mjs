@@ -68,14 +68,14 @@ test('corrupt local save does not crash; high-level portrait and landscape board
 test('capture real gameplay images for release review',async()=>{
   if(!process.env.ARTIFACT_DIR)return
   await mkdir(process.env.ARTIFACT_DIR,{recursive:true})
-  const context=await browser.newContext({viewport:{width:360,height:640},deviceScaleFactor:3,isMobile:true,hasTouch:true})
+  const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,reducedMotion:'reduce'})
   const page=await context.newPage()
   try{
     await page.goto(url);await page.locator('[data-act="continue"]').waitFor()
-    await page.screenshot({path:join(process.env.ARTIFACT_DIR,'01-home.png')})
-    await click(page,'continue');await page.screenshot({path:join(process.env.ARTIFACT_DIR,'02-puzzle.png')})
-    await solve(page,campaign(1));await page.screenshot({path:join(process.env.ARTIFACT_DIR,'03-victory.png')})
-    await click(page,'home');await click(page,'workshop');await page.screenshot({path:join(process.env.ARTIFACT_DIR,'04-workshop.png')})
+    await page.screenshot({path:join(process.env.ARTIFACT_DIR,'01-home.png'),animations:'disabled'})
+    await click(page,'continue');await page.screenshot({path:join(process.env.ARTIFACT_DIR,'02-puzzle.png'),animations:'disabled'})
+    await solve(page,campaign(1));await page.screenshot({path:join(process.env.ARTIFACT_DIR,'03-victory.png'),animations:'disabled'})
+    await click(page,'home');await click(page,'workshop');await page.screenshot({path:join(process.env.ARTIFACT_DIR,'04-workshop.png'),animations:'disabled'})
   }finally{await context.close()}
 })
 test.after(async()=>{await browser.close();server.close()})

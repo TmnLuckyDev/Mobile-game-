@@ -1,6 +1,7 @@
 package com.tmnluckydev.pocketfoundry;
 
-import android.app.Activity;
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
@@ -11,14 +12,13 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.window.OnBackInvokedDispatcher;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
 
-public final class MainActivity extends Activity {
+public final class MainActivity extends ComponentActivity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START = "https://" + HOST + "/index.html";
     private static final Map<String, String> ASSETS;
@@ -78,9 +78,9 @@ public final class MainActivity extends Activity {
         }
         store = new PlayStore(this, this::sendBillingState);
         web.loadUrl(START);
-        if (Build.VERSION.SDK_INT >= 33) {
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::handleBack);
-        }
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() { handleBack(); }
+        });
     }
 
     @Override protected void onResume() {
@@ -92,9 +92,6 @@ public final class MainActivity extends Activity {
         if (web != null) web.onPause();
         super.onPause();
     }
-    @SuppressWarnings("deprecation")
-    @Override public void onBackPressed() { handleBack(); }
-
     private void handleBack() {
         if (web == null || !pageReady) { finish(); return; }
         web.evaluateJavascript("typeof window.foundryBack==='function' && window.foundryBack()", result -> {
