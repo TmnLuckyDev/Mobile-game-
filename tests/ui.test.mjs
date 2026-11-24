@@ -10,7 +10,7 @@ import {campaign,daily} from '../app/src/main/assets/engine.mjs'
 const require=createRequire(import.meta.url)
 const {chromium}=require('playwright')
 const assets=fileURLToPath(new URL('../app/src/main/assets/',import.meta.url))
-const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs','/save.mjs':'save.mjs','/content.mjs':'content.mjs','/hint-worker.mjs':'hint-worker.mjs'}
+const files={'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.mjs':'app.mjs','/engine.mjs':'engine.mjs','/save.mjs':'save.mjs','/content.mjs':'content.mjs','/hint-worker.mjs':'hint-worker.mjs','/economy.mjs':'economy.mjs'}
 const server=createServer(async(req,res)=>{
   const name=files[req.url];if(!name){res.writeHead(404);res.end();return}
   res.setHeader('Content-Type',name.endsWith('.mjs')?'text/javascript':name.endsWith('.css')?'text/css':'text/html')

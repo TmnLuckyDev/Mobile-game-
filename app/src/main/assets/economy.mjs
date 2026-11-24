@@ -1,0 +1,5 @@
+export function weekStart(date){const day=new Date(`${date}T00:00:00Z`);day.setUTCDate(day.getUTCDate()-((day.getUTCDay()+6)%7));return day.toISOString().slice(0,10)}
+export const QUESTS=[{id:'puzzles',title:'Solve three puzzles',target:3,sparks:60,metal:2},{id:'daily',title:'Complete a daily forge',target:1,sparks:35,metal:1},{id:'orders',title:'Complete two special orders',target:2,sparks:75,metal:3}]
+export function weeklyProgress(data,date){const week=weekStart(date),v=data.weekly&&data.weekly.week===week?data.weekly:{week,puzzles:0,daily:0,orders:0,claimed:[]};return v}
+export function recordVictory(data,date,mode){const week=weeklyProgress(data,date);week.puzzles++;if(mode==='daily')week.daily++;if(mode==='orders')week.orders++;data.weekly=week}
+export function claimQuest(data,date,id){const quest=QUESTS.find(x=>x.id===id),week=weeklyProgress(data,date);if(!quest||week.claimed.includes(id)||week[id]<quest.target)return false;week.claimed.push(id);data.weekly=week;data.sparks+=quest.sparks;data.metal+=quest.metal;return true}

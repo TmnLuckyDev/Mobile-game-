@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {campaign,daily,orders,endless,move,won,validBoard,ORDER_COUNT} from '../app/src/main/assets/engine.mjs'
 import {defaults,KEY,LEGACY,BACKUP,load,migrate,persist,reset} from '../app/src/main/assets/save.mjs'
+import {claimQuest,recordVictory,weeklyProgress} from '../app/src/main/assets/economy.mjs'
 const storage=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)}}
 const firstMove=(mode,p,level,date)=>({mode,level,date,board:move(p.board,p.cap,...p.path[0]).board,history:[p.path[0]]})
 test('legacy migration preserves campaign records, money, settings and an unfinished board',()=>{
@@ -16,4 +17,7 @@ test('semantic corruption of one active board does not delete other progress',()
 })
 test('special orders and mastery variants are constructively solvable',()=>{
   for(const p of [...Array.from({length:ORDER_COUNT},(_,i)=>orders(i+1)),...Array.from({length:80},(_,i)=>endless(i+1))]){assert(validBoard(p.board,p.cap,p.colors));let b=p.board;for(const pair of p.path){const m=move(b,p.cap,...pair);assert(m);b=m.board}assert(won(b,p.cap))}
+})
+test('weekly goal rewards are idempotent and progress resets without penalties',()=>{
+  const d=defaults();for(const mode of ['campaign','daily','orders'])recordVictory(d,'2026-11-24',mode);assert(claimQuest(d,'2026-11-24','puzzles'));assert(!claimQuest(d,'2026-11-24','puzzles'));assert.equal(d.sparks,60);assert.equal(d.metal,2);assert.equal(weeklyProgress(d,'2026-12-01').puzzles,0);assert.equal(d.sparks,60);assert.deepEqual(migrate(d).weekly,d.weekly)
 })

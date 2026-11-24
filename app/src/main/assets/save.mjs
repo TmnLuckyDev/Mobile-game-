@@ -3,11 +3,11 @@ import {THEMES,RECIPES} from './content.mjs'
 export const KEY='pocket-foundry-v2', LEGACY='pocket-foundry-v1', BACKUP=KEY+'-backup'
 export const today=()=>new Date().toISOString().slice(0,10)
 export const modes=['campaign','daily','orders','endless']
-export const defaults=()=>({version:2,level:1,records:{},daily:{},orderRecords:{},endlessRecords:{},endlessLevel:1,dailyTotal:0,sparks:0,metal:0,crafted:[],theme:'classic',owned:['classic'],settings:{audio:true,haptic:true,labels:true,largeSymbols:false,reducedMotion:false},activeByMode:{},lastDate:'',revision:0})
+export const defaults=()=>({version:2,level:1,records:{},daily:{},orderRecords:{},endlessRecords:{},endlessLevel:1,dailyTotal:0,sparks:0,metal:0,crafted:[],theme:'classic',owned:['classic'],settings:{audio:true,haptic:true,labels:true,largeSymbols:false,reducedMotion:false},activeByMode:{},weekly:null,lastDate:'',revision:0})
 const integer=(v,max=100000000)=>Number.isInteger(v)&&v>=0&&v<=max?v:0
 const dateKey=k=>typeof k==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(k)&&Number.isFinite(Date.parse(k))&&new Date(k).toISOString().slice(0,10)===k
 export function puzzleFor(mode,level,date){return mode==='campaign'?campaign(level):mode==='orders'?orders(level):mode==='endless'?endless(level):daily(date)}
-function records(src,valid,limit=10000){const out={};for(const [k,v] of Object.entries(src||{}).filter(([k])=>valid(k)).sort(([a],[b])=>a.localeCompare(b)).slice(-limit)){if(v&&integer(v.stars,3)>0&&integer(v.moves,500)>0)out[k]={stars:v.stars,moves:v.moves}}return out}
+function records(src,valid,limit=10000){const out={};for(const [k,v] of Object.entries(src||{}).filter(([k])=>valid(k)).sort(([a],[b])=>/^\d+$/.test(a)&&/^\d+$/.test(b)?+a-+b:a.localeCompare(b)).slice(-limit)){if(v&&integer(v.stars,3)>0&&integer(v.moves,500)>0)out[k]={stars:v.stars,moves:v.moves}}return out}
 const numberKey=(k,max)=>/^\d+$/.test(k)&&+k>=1&&+k<=max&&String(+k)===k
 function active(a,d){
   if(!a||!modes.includes(a.mode)||!Array.isArray(a.history)||a.history.length>500)return null
@@ -23,6 +23,7 @@ export function migrate(s){
   const d=defaults();d.level=Math.max(1,integer(s.level,LEVEL_COUNT));d.endlessLevel=Math.max(1,integer(s.endlessLevel,100000));d.sparks=integer(s.sparks);d.metal=integer(s.metal);d.revision=integer(s.revision)
   d.records=records(s.records,k=>numberKey(k,LEVEL_COUNT));d.daily=records(s.daily,dateKey,730);d.orderRecords=records(s.orderRecords,k=>numberKey(k,ORDER_COUNT));d.endlessRecords=records(s.endlessRecords,k=>numberKey(k,100000),1000)
   d.dailyTotal=Math.max(integer(s.dailyTotal),Object.keys(d.daily).length);d.lastDate=dateKey(s.lastDate)?s.lastDate:''
+  if(s.weekly&&dateKey(s.weekly.week))d.weekly={week:s.weekly.week,puzzles:integer(s.weekly.puzzles),daily:integer(s.weekly.daily),orders:integer(s.weekly.orders),claimed:['puzzles','daily','orders'].filter(k=>Array.isArray(s.weekly.claimed)&&s.weekly.claimed.includes(k))}
   if(s.version===1)d.metal=Object.keys(d.records).length*2+Object.keys(d.daily).length*3
   d.owned=['classic',...THEMES.filter(t=>t.cost>0&&Array.isArray(s.owned)&&s.owned.includes(t.id)).map(t=>t.id)]
   if(THEMES.some(t=>t.id===s.theme))d.theme=s.theme

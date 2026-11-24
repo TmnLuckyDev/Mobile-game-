@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: if test -f package-lock.json; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --ignore-scripts --no-audit --no-fund; fi
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
@@ -49,8 +49,8 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
-      - run: gradle --no-daemon wrapper --gradle-version 8.13 --distribution-type bin
-      - run: gradle --no-daemon --continue :app:assembleDebug :app:bundleRelease :app:lintDebug :app:lintRelease
+      - uses: gradle/actions/wrapper-validation@v4
+      - run: ./gradlew --no-daemon --continue :app:assembleDebug :app:bundleRelease :app:lintDebug :app:lintRelease
       - name: Print lint findings
         if: always()
         run: find app/build -name 'lint-results-debug.txt' -type f -exec head -n 160 {} \;
