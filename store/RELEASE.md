@@ -4,7 +4,7 @@ This is a pre-release candidate, not a signed or published production game. Do n
 
 ## 1. Build / device verification
 
-- Verify the latest GitHub Actions run is green: engine tests, UI tests, Android lint, APK and AAB build.
+- Verify the latest GitHub Actions run is green: engine tests, UI tests, Android lint, APK and AAB build. The Android emulator smoke job additionally verifies Android 16 launch, touch input, process restart, resume, and tutorial completion if the hosted runner supports emulation.
 - Install the debug APK on at least one Android 16 device and one older supported device. Test pause/resume, process kill, rotate, system back, offline launch, all controls, color symbols, and restore after closing the app.
 - Check screenshots on a real Android device. Browser screenshots from CI are preview assets for review, not proof of a native device test.
 - Review accessibility with TalkBack and verify font sizing, touch targets and cutouts.
