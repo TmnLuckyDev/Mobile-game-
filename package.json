@@ -1,0 +1,11 @@
+{
+  "name": "pocket-foundry",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/engine.test.mjs",
+    "test:ui": "node --test tests/ui.test.mjs"
+  },
+  "devDependencies": { "playwright": "1.57.0" }
+}

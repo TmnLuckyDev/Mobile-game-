@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+def playKey = providers.gradleProperty('PLAY_BILLING_PUBLIC_KEY').orElse(providers.environmentVariable('PLAY_BILLING_PUBLIC_KEY')).orElse('').get()
+if (playKey && !(playKey ==~ /[A-Za-z0-9+\/=]+/)) {
+    throw new GradleException('PLAY_BILLING_PUBLIC_KEY must be the base64 Play licensing public key')
+}
+def signingPath = System.getenv('ANDROID_KEYSTORE_PATH')
+def signingAlias = System.getenv('ANDROID_KEY_ALIAS')
+def signingStorePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+def signingKeyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+
+android {
+    namespace 'com.tmnluckydev.pocketfoundry'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.tmnluckydev.pocketfoundry'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+        buildConfigField 'String', 'PLAY_BILLING_PUBLIC_KEY', '"' + playKey + '"'
+    }
+    buildFeatures { buildConfig true }
+    signingConfigs {
+        if (signingPath && signingAlias && signingStorePassword && signingKeyPassword) {
+            release {
+                storeFile file(signingPath)
+                storePassword signingStorePassword
+                keyAlias signingAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (signingConfigs.findByName('release')) signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.android.billingclient:billing:8.0.0'
+}

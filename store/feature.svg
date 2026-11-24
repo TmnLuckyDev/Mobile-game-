@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#433345"/><stop offset=".55" stop-color="#18232f"/><stop offset="1" stop-color="#35272b"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#f4b45a" stop-opacity=".45"/><stop offset="1" stop-color="#f4b45a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="red" x2=".8" y2="1"><stop stop-color="#ffb79b"/><stop offset=".45" stop-color="#f0654e"/><stop offset="1" stop-color="#ac302b"/></linearGradient>
+    <linearGradient id="gold" x2=".8" y2="1"><stop stop-color="#fff09a"/><stop offset=".45" stop-color="#e8bf4c"/><stop offset="1" stop-color="#967320"/></linearGradient>
+    <linearGradient id="jade" x2=".8" y2="1"><stop stop-color="#a7f5b3"/><stop offset=".45" stop-color="#55c88c"/><stop offset="1" stop-color="#24764b"/></linearGradient>
+    <linearGradient id="blue" x2=".8" y2="1"><stop stop-color="#a8e4ff"/><stop offset=".45" stop-color="#38a7e5"/><stop offset="1" stop-color="#2a5f9d"/></linearGradient>
+  </defs>
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <circle cx="772" cy="230" r="305" fill="url(#glow)"/>
+  <g fill="#f8cc81"><circle cx="590" cy="100" r="4"/><circle cx="922" cy="58" r="3"/><circle cx="975" cy="150" r="4"/><circle cx="712" cy="55" r="3"/><path d="M829 43l6 16 16 6-16 6-6 16-6-16-16-6 16-6z"/><path d="M563 333l5 12 12 5-12 5-5 12-5-12-12-5 12-5z"/></g>
+  <g font-family="sans-serif" fill="#fff0d3">
+    <text x="64" y="101" font-size="23" letter-spacing="5" font-weight="700" fill="#ffd38f">POCKET FOUNDRY</text>
+    <text x="64" y="190" font-size="73" font-weight="800">Sort. Forge.</text>
+    <text x="64" y="270" font-size="84" font-weight="800" fill="#ffcd7b">Shine.</text>
+    <text x="68" y="320" font-size="26" fill="#d5c4c2">A cozy color puzzle</text>
+    <text x="68" y="358" font-size="20" fill="#bfbac4">Your little workshop of calm.</text>
+    <rect x="65" y="396" width="250" height="43" rx="22" fill="#62493c" stroke="#d39a62"/>
+    <text x="190" y="424" fill="#ffe3b1" text-anchor="middle" font-size="18" font-weight="700">100 PUZZLES + DAILY</text>
+  </g>
+  <g transform="translate(590 113) rotate(-7)">
+    <rect x="0" y="0" width="108" height="291" rx="16" fill="#18212b" stroke="#7e8996" stroke-width="5"/>
+    <rect x="9" y="214" width="90" height="62" rx="8" fill="url(#red)"/><rect x="9" y="147" width="90" height="62" rx="8" fill="url(#gold)"/><rect x="9" y="80" width="90" height="62" rx="8" fill="url(#jade)"/><rect x="9" y="13" width="90" height="62" rx="8" fill="url(#red)"/>
+    <rect x="-7" y="-7" width="122" height="15" rx="6" fill="#a9b7c3"/><rect x="-7" y="286" width="122" height="12" rx="5" fill="#566575"/>
+    <g fill="#392c2c99" font-family="sans-serif" font-size="26" text-anchor="middle"><text x="54" y="53">◆</text><text x="54" y="120">▲</text><text x="54" y="187">●</text><text x="54" y="254">◆</text></g>
+  </g>
+  <g transform="translate(724 106)">
+    <rect x="0" y="0" width="108" height="291" rx="16" fill="#18212b" stroke="#f4c579" stroke-width="6"/>
+    <rect x="9" y="214" width="90" height="62" rx="8" fill="url(#gold)"/><rect x="9" y="147" width="90" height="62" rx="8" fill="url(#gold)"/><rect x="9" y="80" width="90" height="62" rx="8" fill="url(#gold)"/><rect x="9" y="13" width="90" height="62" rx="8" fill="url(#gold)"/>
+    <rect x="-7" y="-7" width="122" height="15" rx="6" fill="#f6d17b"/><rect x="-7" y="286" width="122" height="12" rx="5" fill="#8e7554"/>
+    <g fill="#6e501e99" font-family="sans-serif" font-size="26" text-anchor="middle"><text x="54" y="53">●</text><text x="54" y="120">●</text><text x="54" y="187">●</text><text x="54" y="254">●</text></g>
+    <circle cx="104" cy="7" r="25" fill="#ffdd92" stroke="#a4743c" stroke-width="4"/><path d="m92 7 8 9 15-18" fill="none" stroke="#5f472b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(866 108) rotate(8)">
+    <rect x="0" y="0" width="108" height="291" rx="16" fill="#18212b" stroke="#7e8996" stroke-width="5"/>
+    <rect x="9" y="214" width="90" height="62" rx="8" fill="url(#blue)"/><rect x="9" y="147" width="90" height="62" rx="8" fill="url(#red)"/><rect x="9" y="80" width="90" height="62" rx="8" fill="url(#jade)"/>
+    <rect x="-7" y="-7" width="122" height="15" rx="6" fill="#a9b7c3"/><rect x="-7" y="286" width="122" height="12" rx="5" fill="#566575"/>
+    <g fill="#392c2c99" font-family="sans-serif" font-size="26" text-anchor="middle"><text x="54" y="120">▲</text><text x="54" y="187">◆</text><text x="54" y="254">■</text></g>
+  </g>
+</svg>
